@@ -2,40 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import type { Wallpaper } from "@/data/wallpapers";
-
-interface CategoryCarouselProps {
-  categories: { slug: string; name: string; icon: string }[];
-  activeIndex: number;
-  onSelect: (index: number) => void;
-}
-
-function CategoryCarousel({ categories, activeIndex, onSelect }: CategoryCarouselProps) {
-  return (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-      {categories.map((cat, idx) => (
-        <button
-          key={cat.slug}
-          onClick={() => onSelect(idx)}
-          className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
-            activeIndex === idx
-              ? "border-transparent text-white"
-              : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)]"
-          }`}
-          style={{
-            background: activeIndex === idx ? 'var(--foreground)' : 'var(--surface)',
-            color: activeIndex === idx ? 'var(--background)' : 'var(--foreground)',
-            borderColor: activeIndex === idx ? 'transparent' : 'var(--border)',
-          }}
-        >
-          <span className="mr-2">{cat.icon}</span>
-          {cat.name}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 interface WallpaperCarouselProps {
   wallpapers: Wallpaper[];
@@ -56,10 +23,6 @@ export default function WallpaperCarousel({ wallpapers }: WallpaperCarouselProps
     return () => clearInterval(interval);
   }, [isPaused, wallpapers.length]);
 
-  const goTo = (index: number) => {
-    setCurrentIndex(index);
-  };
-
   const goPrev = () => {
     setCurrentIndex((prev) => (prev - 1 + wallpapers.length) % wallpapers.length);
   };
@@ -67,9 +30,6 @@ export default function WallpaperCarousel({ wallpapers }: WallpaperCarouselProps
   const goNext = () => {
     setCurrentIndex((prev) => (prev + 1) % wallpapers.length);
   };
-
-  const celularSize = wallpapers[currentIndex]?.downloads.find(d => d.height > d.width) || wallpapers[currentIndex]?.downloads[0];
-  const desktopSize = wallpapers[currentIndex]?.downloads.find(d => d.width > d.height) || wallpapers[currentIndex]?.downloads[0];
 
   const handleDownload = async (e: React.MouseEvent, url: string, filename: string) => {
     e.preventDefault();
@@ -95,57 +55,63 @@ export default function WallpaperCarousel({ wallpapers }: WallpaperCarouselProps
 
   if (wallpapers.length === 0) return null;
 
+  const currentWallpaper = wallpapers[currentIndex];
+  const celularSize = currentWallpaper.downloads.find(d => d.height > d.width) || currentWallpaper.downloads[0];
+  const desktopSize = currentWallpaper.downloads.find(d => d.width > d.height) || currentWallpaper.downloads[0];
+
   return (
     <div 
-      className="relative overflow-hidden rounded-3xl"
+      className="relative overflow-hidden rounded-2xl"
       ref={containerRef}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       <div 
-        className="relative h-[400px] w-full bg-cover bg-center transition-all duration-700"
+        className="relative h-[400px] w-full bg-cover bg-center"
         style={{ 
-          backgroundImage: `url(${wallpapers[currentIndex].image})`,
+          backgroundImage: `url(${currentWallpaper.image})`,
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/50 to-zinc-950/20" />
         
-        <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
+        <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8">
           <div className="max-w-2xl">
-            <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-medium uppercase tracking-wider backdrop-blur-sm">
-              {wallpapers[currentIndex].category}
+            <span className="inline-block rounded-md bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-white/90 backdrop-blur-sm">
+              {currentWallpaper.category}
             </span>
-            <h2 className="mt-3 text-3xl font-bold sm:text-4xl lg:text-5xl">
-              {wallpapers[currentIndex].title}
+            <h2 className="mt-3 text-2xl font-bold leading-tight text-white sm:text-3xl lg:text-4xl">
+              {currentWallpaper.title}
             </h2>
-            <p className="mt-2 text-white/80">
-              {wallpapers[currentIndex].description}
+            <p className="mt-2 max-w-xl text-sm text-white/70">
+              {currentWallpaper.description}
             </p>
             
-            <div className="mt-4 flex gap-3">
+            <div className="mt-5 flex flex-wrap gap-3">
               <button
-                onClick={(e) => handleDownload(e, celularSize?.url || '', `${wallpapers[currentIndex].slug}-celular`)}
-                className="flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-white/90"
+                onClick={(e) => handleDownload(e, celularSize?.url || '', `${currentWallpaper.slug}-celular`)}
+                className="flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-zinc-100"
               >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 Celular
               </button>
               <button
-                onClick={(e) => handleDownload(e, desktopSize?.url || '', `${wallpapers[currentIndex].slug}-desktop`)}
-                className="flex items-center gap-2 rounded-full border border-white/50 bg-white/10 px-6 py-3 text-sm font-semibold backdrop-blur-sm transition hover:bg-white/20"
+                onClick={(e) => handleDownload(e, desktopSize?.url || '', `${currentWallpaper.slug}-desktop`)}
+                className="flex items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20"
               >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <line x1="8" y1="21" x2="16" y2="21" />
+                  <line x1="12" y1="17" x2="12" y2="21" />
                 </svg>
                 Desktop
               </button>
               <Link
-                href={`/wallpaper/${wallpapers[currentIndex].slug}`}
-                className="flex items-center gap-2 rounded-full border border-white/50 bg-white/10 px-6 py-3 text-sm font-semibold backdrop-blur-sm transition hover:bg-white/20"
+                href={`/wallpaper/${currentWallpaper.slug}`}
+                className="flex items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20"
               >
-                Ver mais
+                Ver detalhes
               </Link>
             </div>
           </div>
@@ -153,30 +119,33 @@ export default function WallpaperCarousel({ wallpapers }: WallpaperCarouselProps
 
         <button
           onClick={goPrev}
-          className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/20 p-3 backdrop-blur-sm transition hover:bg-white/30"
+          className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white/80 backdrop-blur-sm transition hover:bg-white/20 hover:text-white sm:left-4"
+          aria-label="Slide anterior"
         >
-          <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         
         <button
           onClick={goNext}
-          className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/20 p-3 backdrop-blur-sm transition hover:bg-white/30"
+          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white/80 backdrop-blur-sm transition hover:bg-white/20 hover:text-white sm:right-4"
+          aria-label="Próximo slide"
         >
-          <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         </button>
 
-        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2 sm:bottom-6">
           {wallpapers.map((_, idx) => (
             <button
               key={idx}
-              onClick={() => goTo(idx)}
-              className={`h-2 rounded-full transition-all ${
-                idx === currentIndex ? "w-8 bg-white" : "w-2 bg-white/50"
+              onClick={() => setCurrentIndex(idx)}
+              className={`h-1 rounded-full transition-all ${
+                idx === currentIndex ? "w-6 bg-white" : "w-1 bg-white/50"
               }`}
+              aria-label={`Ir para slide ${idx + 1}`}
             />
           ))}
         </div>

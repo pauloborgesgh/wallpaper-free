@@ -66,8 +66,15 @@ export default function RootLayout({
       </Script>
       <Script
         async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1487124869288052"
-        crossOrigin="anonymous"
+        defer
+        src="https://acdn.agora.io/adb/auto.js"
+      />
+      <Script id="aclib-run">
+        {`
+          aclib.runAutoTag({
+            zoneId: 'ev1kblh9qv',
+          });
+        `}
       />
     </html>
   );
