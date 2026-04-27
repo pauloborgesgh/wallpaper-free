@@ -65,16 +65,23 @@ export default function RootLayout({
         `}
       </Script>
       <Script
-        async
-        defer
-        src="https://acdn.agora.io/adb/auto.js"
-      />
-      <Script id="aclib-run">
-        {`
-          aclib.runAutoTag({
-            zoneId: 'ev1kblh9qv',
-          });
-        `}
+        id="aclib-run"
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              var script = document.createElement('script');
+              script.src = 'https://acdn.agora.io/adb/auto.js';
+              script.async = true;
+              script.defer = true;
+              document.head.appendChild(script);
+              script.onload = function() {
+                aclib.runAutoTag({
+                  zoneId: 'ev1kblh9qv',
+                });
+              };
+            })();
+          `
+        }}
       />
     </html>
   );
