@@ -53,17 +53,43 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
       <Script
-        async
-        src="https://www.googletagmanager.com/gtag/js?id=G-H07MGGD7B9"
+        id="google-analytics"
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-H07MGGD7B9');
+          `
+        }}
       />
-      <Script id="google-analytics">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-H07MGGD7B9');
-        `}
-      </Script>
+      <Script
+        id="gtag-src"
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              var script = document.createElement('script');
+              script.src = 'https://www.googletagmanager.com/gtag/js?id=G-H07MGGD7B9';
+              script.async = true;
+              document.head.appendChild(script);
+            })();
+          `
+        }}
+      />
+      <Script
+        id="adsense"
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              var script = document.createElement('script');
+              script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1487124869288052';
+              script.async = true;
+              script.crossOrigin = 'anonymous';
+              document.head.appendChild(script);
+            })();
+          `
+        }}
+      />
       <Script
         id="aclib-run"
         dangerouslySetInnerHTML={{
@@ -75,9 +101,11 @@ export default function RootLayout({
               script.defer = true;
               document.head.appendChild(script);
               script.onload = function() {
-                aclib.runAutoTag({
-                  zoneId: 'ev1kblh9qv',
-                });
+                if (typeof aclib !== 'undefined') {
+                  aclib.runAutoTag({
+                    zoneId: 'ev1kblh9qv',
+                  });
+                }
               };
             })();
           `
